@@ -1,0 +1,38 @@
+{
+  "name": "react-17-scaffold",
+  "version": "1.0.0",
+  "description": "Scaffold for react 17 client app",
+  "main": "index.js",
+  "engines": {
+    "node": "14.16.0",
+    "npm": "7.10.0"
+  },
+  "scripts": {
+    "start": "node index.js",
+    "server": "nodemon index.js",
+    "client": "npm run start --prefix client",
+    "dev": "concurrently \"npm run server\" \"npm run client\"",
+    "postinstall": "npm install --prefix client",
+    "heroku-postbuild": "NPM_CONFIG_PRODUCTION=true npm install --prefix client && npm run build --prefix client",
+    "client-linter": "npm run linter --prefix client",
+    "cy:run": "npx cypress run --headless",
+    "test": "PORT=3000 NODE_ENV=test start-server-and-test start http-get://karons-jerk-chicken-joint.speedetab.local:3000/ cy:run"
+  },
+  "author": "edgarsilva",
+  "license": "ISC",
+  "dependencies": {
+    "@types/react-transition-group": "^4.4.4",
+    "concurrently": "^6.0.2",
+    "connect-redis": "^5.1.0",
+    "express": "^4.17.1",
+    "express-session": "^1.17.1",
+    "jsonwebtoken": "^8.5.1",
+    "nodemon": "^2.0.7",
+    "passport": "^0.4.1",
+    "passport-google-oauth20": "^2.0.0",
+    "passport-http-bearer": "^1.0.1",
+    "passport-jwt": "^4.0.0",
+    "passport-local": "^1.0.0",
+    "redis": "^3.1.2"
+  }
+}
