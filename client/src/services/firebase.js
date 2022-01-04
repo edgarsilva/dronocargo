@@ -1,26 +1,30 @@
 // Firebase Imports
-import firebase from "firebase/app";
-import "firebase/storage";
-import "firebase/firestore";
-import "firebase/auth";
+import { initializeApp } from "firebase/app";
 
-// import { useAuthState } from "react-firebase-hooks/auth";
-// import { useCollectionData } from "react-firebase-hooks/firestore";
+// Import the functions you need from the SDKs you need
+import { getFirestore } from 'firebase/firestore/lite';
+import { getAuth } from "firebase/auth";
 
-// Firebase setup
-!firebase.apps.length && firebase.initializeApp({
+// Firebase app configuration setup
+const firebaseConfig = {
+  apiKey: "AIzaSyC8FuK9Xfa8XVDHFNij8BQOmVnMyA3I6yc",
+  authDomain: "dronocargo.firebaseapp.com",
+  projectId: "dronocargo",
+  storageBucket: "dronocargo.appspot.com",
+  messagingSenderId: "524601128296",
+  appId: "1:524601128296:web:d2d3c3ba332267ea8712dd",
+  databaseURL: "https://dronocargo.firebaseio.com",
+};
 
-});
+
+// Initialize Firebase
+const app = initializeApp(firebaseConfig);
 
 // Auth
-export const firebaseAuth = firebase.auth();
-export const googleAuthProvider = new firebase.auth.GoogleAuthProvider();
+export const auth = getAuth();
 
 // DB
-export const firestore = firebase.firestore();
+export const db = getFirestore(app);
+// export const auth = getAuth();
 
-// Storage
-export const storageRef = firebase.storage().ref();
-export const projectPhotosRef = storageRef.child("projectPhotos");
-
-export default firebase;
+export default app;

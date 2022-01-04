@@ -44,6 +44,7 @@
   top: 0px;
   /* width: 300px; */
   transform: translateX(0%);
+  transform: translateY(5px);
   background-color: var(--bg);
   border: var(--border);
   border-radius: var(--border-radius);
@@ -74,12 +75,21 @@
   font-size: 16px;
   padding: 0px 16px;
   color: black;
+  cursor: initial;
+}
+
+.menu-item.selected{
+  background: #307460;
+  color: white !important;
 }
 
 .menu-item .icon-button {
   margin-right: 0.5rem;
 }
 
+.menu-item .icon-button {
+  margin-right: 0.5rem;
+}
 
 .menu-item .icon-button:hover {
   filter: none;

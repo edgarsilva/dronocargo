@@ -1,9 +1,19 @@
-import { useEffect } from 'react';
+// React Imports
+import React, { useEffect, useState } from 'react';
 import { useSelector, useDispatch } from 'react-redux'
-import { BrowserRouter, Route } from 'react-router-dom';
+import { BrowserRouter, Routes, Route, Link,  useNavigate, useParams, Outlet } from 'react-router-dom';
+
+// Firebase
+import { auth } from "../services/firebase";
+import { signInWithPopup, GoogleAuthProvider, signOut } from "firebase/auth";
+import { useAuthState } from "react-firebase-hooks/auth";
+
+
 
 // Local components
 import Dropdown from "./Dropdown";
+import NewDeliveryModal from "./NewDeliveryModal";
+import AppButton from "./AppButton";
 
 // CSS Assets
 import '../styles/index.css';
@@ -11,10 +21,11 @@ import '../styles/App.css';
 import 'semantic-ui-css/semantic.min.css';
 
 // UI Componenents
-import { Button, Icon, Input, Table } from 'semantic-ui-react'
+import { Icon, Confirm, Image, Input, Segment, Table } from 'semantic-ui-react'
 
 // Actions
-import { authActions } from "../store/auth-slice";
+import { fetchDeliveries, commitDelivery, deleteDelivery } from "../store/deliveries-actions";
+import { firebaseSignIn } from "../store/auth-actions";
 
 // Assets
 import userIcon from "../images/user.svg";
@@ -22,6 +33,8 @@ import sidebarIcon from "../images/sidebar-icon.svg";
 
 // Styles
 import styled from 'styled-components';
+import DeliveryForm from "./DeliveryForm";
+
 const FlexContainer = styled.div`
   display: flex;
   padding: 24px 32px;
@@ -29,7 +42,7 @@ const FlexContainer = styled.div`
   flex-direction: column;
 `;
 
-const Appbar = styled.div`
+const AppbarContainer = styled.div`
   display: flex;
   flex-direction: row;
   justify-content: space-between;
@@ -43,6 +56,7 @@ const UserName = styled.div`
   display: flex;
   font-size: 16px;
   line-height: 24px;
+  align-items: center;
 `;
 
 const CompanyName = styled.div`
@@ -64,11 +78,10 @@ const HeaderTitle = styled.div`
   font-style: normal;
   font-weight: normal;
   font-size: 30px;
-  line-height: 36px;
+  line-height: 40px;
 `;
 
 const HeaderSub = styled.span`
-  // background-color: green;
   display: inline-block;
   margin-left: 16px;
   background-color: 10;
@@ -82,12 +95,11 @@ const HeaderActions = styled.div`
 
 const MainContent = styled.div`
   flex-direction: column;
-  // background-color: green;
   flex: 1;
   margin-bottom: 40px;
 `;
 
-const FooterContainer = styled.div`
+const Footer = styled.div`
   display: flex;
   flex-direction: row;
   justify-content: space-between;
@@ -103,36 +115,8 @@ const FooterText = styled.div`
   line-height: 19px;
 `;
 
-const AppButton = styled(Button)`
-  &.ui.button.app-button {
-    min-width: 122px;
-    display: flex;
-    flex-direction: row;
-    align-items: center;
-    justify-content: center;
-    border: 1px solid rgba(0, 0, 0, 0.15);
-    box-sizing: border-box;
-    box-shadow: 0px 1px 4px rgba(0, 0, 0, 0.1);
-    border-radius: 4px;
-    font-weight: 500;
-    font-size: 16px;
-    padding: 0px 16px;
-    color: rgba(0,0,0,1) !important;
-    margin-left: 16px;
-    margin-right: 0px;
-    height: 40px;
-
-    &.new-delivery {
-      padding: 8px 16px;
-      background: #307460;
-      color: white !important;
-    }
-  }
-`;
-
 const SearchInput = styled(Input)`
   &.ui.input.novo-search {
-    // border: 1px solid rgba(0, 0, 0, 0.15);
     box-sizing: border-box;
     box-shadow: 0px 1px 4px rgba(0, 0, 0, 0.1);
     border-radius: 4px;
@@ -149,11 +133,6 @@ const NovoTable = styled(Table)`
     line-height: 24px;
     padding-top: 32px;
     padding-bottom: 32px;
-
-    /* &.actions-cell {
-      color: black;
-      display: flex;
-    } */
   }
 `;
 
@@ -181,124 +160,287 @@ const IconImg = styled.img`
 `;
 
 const DeliveriesTable = ({ dataset }) => {
+  const dispatch = useDispatch();
+  const navigate = useNavigate();
+  const [deleteItem, setDeleteItem] = useState({ show: false });
+
   return (
-    <NovoTable basic="very" className="novo-table">
-      <Table.Body>
-        {dataset.map((item) => (
-          <Table.Row>
-            <TableCell>
-              <CellLabel>Status</CellLabel>
-              {item.status}
-            </TableCell>
+    <>
+      <NovoTable basic="very" className="novo-table">
+        <Table.Body>
+          {dataset.map((item) => (
+            <Table.Row key={item.orderId}>
+              <TableCell>
+                <CellLabel>Status</CellLabel>
+                {item.status}
+              </TableCell>
 
-            <TableCell>
-              <CellLabel>Order ID</CellLabel>
-              {item.orderId}
-            </TableCell>
-            <TableCell>
-              <CellLabel>Technician</CellLabel>
-              {item.technician}
-            </TableCell>
-            <TableCell>
-              <CellLabel>Platfggorm</CellLabel>
-              {item.platform}
-            </TableCell>
-            <TableCell>
-              <CellLabel>Drone</CellLabel>
-              {item.drone}
-            </TableCell>
-            <TableCell>
-              <CellLabel>Technician Check</CellLabel>
-              {item.technicianCheck}
-            </TableCell>
+              <TableCell>
+                <CellLabel>Order ID</CellLabel>
+                {item.orderId}
+              </TableCell>
+              <TableCell>
+                <CellLabel>Technician</CellLabel>
+                {item.technician}
+              </TableCell>
+              <TableCell>
+                <CellLabel>Platfggorm</CellLabel>
+                {item.platform}
+              </TableCell>
+              <TableCell>
+                <CellLabel>Drone</CellLabel>
+                {item.drone}
+              </TableCell>
+              <TableCell>
+                <CellLabel>Technician Check</CellLabel>
+                {item.check || "pending"}
+              </TableCell>
+              <TableCell collapsing>
+                <ActionsContainer>
+                  <AppButton
+                    style={{ marginRight: 16 }}
+                    as={Link}
+                    to={`/shipment/${item.orderId}`}
+                  >
+                    Details
+                    <IconImg src={sidebarIcon} />
+                  </AppButton>
+                  <Dropdown
+                    text="Some  Actions"
+                    options={[
+                      {text: "Edit", value: "edit"},
+                      {text: "Delete", value: "delete"},
+                    ]}
+                    onClick={(action) => {
+                      switch (action.value) {
+                        case "edit":
+                          return navigate(`/shipment/${item.orderId}`);
+                        case "delete":
+                          return setDeleteItem({ id: item.id, show: true });
+                        default:
+                          break;
+                      }
+                    }}
+                  />
+                </ActionsContainer>
+              </TableCell>
+            </Table.Row>
+          ))}
+        </Table.Body>
 
-            <TableCell collapsing>
-              <ActionsContainer>
-                <AppButton basic className="ui button app-button">
-                  Details
-                  <IconImg src={sidebarIcon} />
-                </AppButton>
-                <Dropdown />
-              </ActionsContainer>
-            </TableCell>
-          </Table.Row>
-        ))}
-      </Table.Body>
-    </NovoTable>
+      </NovoTable>
+      <Confirm
+        open={deleteItem.show}
+        content={<HeaderTitle style={{ padding: 30 }}>Are you sure?</HeaderTitle>}
+        cancelButton={<AppButton className="ui button app-button" style={{ display: "inline-block "}}>Cancel</AppButton>}
+        confirmButton={<AppButton className="ui button app-button new-delivery" style={{ display: "inline-block "}}>Delete</AppButton>}
+        onCancel={() => setDeleteItem({ ...deleteItem, show: false })}
+        onConfirm={() => {
+          dispatch(deleteDelivery(deleteItem.id)).then(() => {
+            setDeleteItem({ show: false });
+          });
+        }}
+      />
+    </>
   );
 };
 
+const provider = new GoogleAuthProvider();
+const Appbar = () => {
+  const dispatch = useDispatch();
+  const user = useSelector(state => state.auth?.user)
 
-const Landing = () => {
-  const user = useSelector(state => {
-    console.log("Initial State:", state);
-    return state.user;
-  });
-
-  // if (!user) {
-  //   return <Redirect to="/sign-in" />;
-  // }
-
-  const dataset = [
-    { status: "ready", orderId: "009-300FCT", technician: "Ben Santana", platform: "gamma", drone: "DJI-004Q", technicianCheck: "passed" },
-    { status: "ready", orderId: "009-300FCT", technician: "Ben Santana", platform: "gamma", drone: "DJI-004Q", technicianCheck: "passed" },
-    { status: "ready", orderId: "009-300FCT", technician: "Ben Santana", platform: "gamma", drone: "DJI-004Q", technicianCheck: "passed" },
-    { status: "ready", orderId: "009-300FCT", technician: "Ben Santana", platform: "gamma", drone: "DJI-004Q", technicianCheck: "passed" },
-    { status: "ready", orderId: "009-300FCT", technician: "Ben Santana", platform: "gamma", drone: "DJI-004Q", technicianCheck: "passed" },
-  ];
+  if (!user) {
+    return (
+      <AppbarContainer>
+        <CompanyName>Dronocargo</CompanyName>
+        <AppButton
+          className="ui button app-button new-delivery"
+          onClick={() => {
+            signInWithPopup(auth, provider)
+            .then((result) => {
+              // This gives you a Google Access Token. You can use it to access the Google API.
+              // jconst credential = GoogleAuthProvider.credentialFromResult(result);
+              // jconst token = credential.accessToken;
+              // The signed-in user info.
+              const user = result.user;
+              // console.log("User Info:", user);
+              dispatch(firebaseSignIn(user));
+              // ...
+            }).catch((error) => {
+              // Handle Errors here.
+              // jconst errorCode = error.code;
+              const errorMessage = error.message;
+              // The email of the user's account used.
+              // jconst email = error.email;
+              // The AuthCredential type that was used.
+              // jconst credential = GoogleAuthProvider.credentialFromError(error);
+              console.error("The Error:", errorMessage);
+              // ...
+            });
+          }}
+        >
+          Login with google
+        </AppButton>
+      </AppbarContainer>
+    );
+  }
 
   return (
-    <FlexContainer>
-      <Appbar>
-        <CompanyName>Dronocargo</CompanyName>
-        <UserName>
-          Regina Zepeda
-          <img style={{ marginLeft: "10px", opacity: 0.5, }} src={userIcon} alt="user icon" />
-          {/* <Icon style={{ marginLeft: "10px", opacity: 0.5, }} name='user circle outline' size='large' /> */}
-        </UserName>
-      </Appbar>
+    <AppbarContainer>
+      <CompanyName>Dronocargo</CompanyName>
+      <UserName>
+        {user.displayName}
+
+        {user.photoURL ? (
+          <Image style={{marginLeft: "10px"}} src={user.photoURL} avatar />
+        ) : (
+          <img style={{marginLeft: "10px", opacity: 0.5}} src={userIcon} alt="user icon" />
+        )}
+
+        <Icon
+          name="sign out"
+          size="large"
+          alt="Sign Out"
+          style={{cursor: "pointer"}}
+          onClick={() => {
+            signOut(auth)
+              .then(() => {
+                // Sign-out successful.
+                dispatch(signOut());
+              })
+              .catch((error) => {
+                console.log("Sign out error:", error);
+                // An error happened.
+              });
+          }}
+        />
+      </UserName>
+    </AppbarContainer>
+  );
+}
+
+const Landing = () => {
+  const dispatch = useDispatch();
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const deliveries = useSelector(state => {
+    return state.deliveries?.items;
+  });
+
+  useEffect(() => {
+    if (deliveries == null) {
+      dispatch(fetchDeliveries());
+    }
+  }, []);
+
+  const dataset = () => (deliveries || []);
+
+  return (
+    <>
       <HeaderContainer>
         <HeaderTitle>
           Delivery
           <HeaderSub>History</HeaderSub>
         </HeaderTitle>
         <HeaderActions>
-          <SearchInput size="big" icon='search' iconPosition='left' placeholder='Search users...' className="novo-search" />
-          <AppButton size='medium' className="ui button app-button new-delivery">New Delivery</AppButton>
+          <SearchInput
+            size="big"
+            icon="search"
+            iconPosition="left"
+            placeholder="Search"
+            className="novo-search"
+          />
+          <AppButton className="ui button app-button new-delivery" onClick={() => setIsModalOpen(true)}>
+            New Delivery
+          </AppButton>
         </HeaderActions>
       </HeaderContainer>
-      <MainContent>
-        <DeliveriesTable dataset={dataset} />
-      </MainContent>
-      <FooterContainer>
-        <FooterText>
-          Powered by Nuvocargo
-        </FooterText>
-        <FooterText>Help</FooterText>
-      </FooterContainer>
-    </FlexContainer>
-  )
+
+      <DeliveriesTable dataset={dataset()} />
+
+      <NewDeliveryModal
+        isOpen={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
+        onSave={() => setIsModalOpen(false)}
+      />
+    </>
+  );
 };
 
-export default function App() {
+const OrderDetails = () => {
   const dispatch = useDispatch();
-  const user = useSelector(state => state.user);
-  const printState = useSelector(state => {
-    console.log("PrintState:", state);
-});
+  const params = useParams();
+  const navigate = useNavigate();
+  const delivery = useSelector(state => state.deliveries?.items?.find(item => item.orderId === params.orderId ));
 
   useEffect(() => {
-    console.log("Use Effect has run!");
-    dispatch(authActions.fetchUser("Test passing arguments."));
-  }, [dispatch, user]);
+    if (delivery) {
+      return;
+    }
 
-  // const classes = useStyles();
+    navigate("/");
+  }, []);
 
   return (
-    <div>
-      <BrowserRouter>
-        <Route exact path="/" component={Landing} />
-      </BrowserRouter>
-    </div>
+    <>
+      <HeaderContainer>
+        <HeaderTitle>
+          Delivery
+          <HeaderSub>Details</HeaderSub>
+        </HeaderTitle>
+      </HeaderContainer>
+
+      <Segment compact loading={delivery.loading}>
+        <DeliveryForm
+          delivery={delivery}
+          onDone={(values) => {
+            dispatch(commitDelivery({...values, id: delivery.id})).then(() => {
+              navigate("/");
+            });
+          }}
+          onCancel={() => {
+            navigate("/");
+          }}
+        />
+      </Segment>
+    </>
+  );
+}
+
+const SharedLayout = () => {
+  const dispatch = useDispatch();
+  const [firebaseUser] = useAuthState(auth);
+  // const user = useSelector(state => state.auth.user);
+
+  useEffect(() => {
+    dispatch(firebaseSignIn(firebaseUser));
+  }, [dispatch, firebaseUser]);
+
+  return (
+    <FlexContainer>
+      <Appbar />
+
+      <MainContent>
+        <Outlet />
+      </MainContent>
+
+      <Footer>
+        <FooterText>Powered by Nuvocargo</FooterText>
+        <FooterText>Help</FooterText>
+      </Footer>
+    </FlexContainer>
+  );
+}
+
+export default function App() {
+  return (
+    <BrowserRouter>
+      <Routes>
+        <Route path="/" element={<SharedLayout />}>
+          <Route path="/" element={<Landing />} />
+          <Route path="/shipment/:orderId" element={<OrderDetails />} />
+        </Route>
+      </Routes>
+    </BrowserRouter>
   );
 }

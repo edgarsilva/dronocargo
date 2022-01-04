@@ -1,7 +1,5 @@
 // React, Reduc & React Router DOM imports
 import {useState, useEffect, useRef} from "react";
-import {useSelector, useDispatch} from "react-redux";
-import {Link as RouterLink, useHistory} from "react-router-dom";
 import {CSSTransition} from "react-transition-group";
 
 // Firebase Imports
@@ -14,10 +12,10 @@ import { Button, Icon } from 'semantic-ui-react'
 // import { ReactComponent as BellIcon } from '../icons/bell.svg';
 // import { ReactComponent as MessengerIcon } from '../icons/messenger.svg';
 // import { ReactComponent as CaretIcon } from '../icons/caret.svg';
-import { ReactComponent as PlusIcon } from "../images/plus.svg";
+// import { ReactComponent as PlusIcon } from "../images/plus.svg";
 // import { ReactComponent as CogIcon } from '../icons/cog.svg';
-import { ReactComponent as ArrowIcon } from "../images/arrow.svg";
-import { ReactComponent as BoltIcon } from "../images/bolt.svg";
+// import { ReactComponent as ArrowIcon } from "../images/arrow.svg";
+// import { ReactComponent as BoltIcon } from "../images/bolt.svg";
 
 // Actions
 // import {authActions} from "../store/auth-slice";
@@ -26,15 +24,20 @@ import { ReactComponent as BoltIcon } from "../images/bolt.svg";
 // Styles
 import styled from 'styled-components';
 const DropdownContainer = styled.div`
+  width: "100%";
   height: 40px;
+  width: 100%;
+  flex: 1 1 auto;
+  background-color: "green";
 `;
+
 const AppButton = styled(Button)`
   &.ui.button.app-button {
-    min-width: 122px;
     display: flex;
+    width: 100%;
     flex-direction: row;
-    align-items: center;
     justify-content: center;
+    align-items: center;
     border: 1px solid rgba(0, 0, 0, 0.15);
     box-sizing: border-box;
     box-shadow: 0px 1px 4px rgba(0, 0, 0, 0.1);
@@ -43,9 +46,8 @@ const AppButton = styled(Button)`
     font-size: 16px;
     padding: 0px 16px;
     color: rgba(0,0,0,1) !important;
-    margin-left: 16px;
-    margin-right: 0px;
     height: 40px;
+    margin: 0;
 
     &.new-delivery {
       padding: 8px 16px;
@@ -54,11 +56,9 @@ const AppButton = styled(Button)`
   }
 `;
 
-function DropdownMenu({ leftAligned, user }) {
-  const dispatch = useDispatch();
+function DropdownMenu({ leftAligned, options, onClick, selected }) {
   const [activeMenu, setActiveMenu] = useState("main");
   const [menuHeight, setMenuHeight] = useState("auto");
-  const history = useHistory();
   const dropdownRef = useRef(null);
 
   useEffect(() => {
@@ -73,15 +73,17 @@ function DropdownMenu({ leftAligned, user }) {
   function DropdownItem(props) {
     return (
       <div
-        className="menu-item"
+        className={"menu-item" + (props.selected ? " selected" : "")}
         onClick={() => {
           props.goToMenu && setActiveMenu(props.goToMenu);
           props.onClick?.();
         }}
       >
-        <span className="icon-button">
-          <Icon name={props.leftIcon}></Icon>
-        </span>
+        { props.leftIcon && (
+          <span className="icon-button">
+            <Icon name={props.leftIcon}></Icon>
+          </span>
+        )}
         {props.children}
         <span className="icon-right"><Icon name={props.rightIcon}></Icon></span>
       </div>
@@ -102,26 +104,22 @@ function DropdownMenu({ leftAligned, user }) {
         onEnter={calcHeight}
       >
         <div className="menu">
-          <DropdownItem
-            leftIcon="edit"
-            onclick={() => {
-              console.log("edit!");
-            }}
-          >
-            Edit
-          </DropdownItem>
-          <DropdownItem
-            leftIcon="trash alternate outline"
-            onclick={() => {
-              console.log("delete!");
-            }}
-          >
-            Delete
-          </DropdownItem>
+          { options.map((item, index) =>  (
+            <DropdownItem
+              selected={selected === item.value}
+              key={item.id || item.orderId || index}
+              leftIcon={item.icon}
+              onClick={() => {
+                onClick?.(item)
+              }}
+            >
+              { item.text }
+            </DropdownItem>
+          ))}
         </div>
       </CSSTransition>
 
-      <CSSTransition
+      {/* <CSSTransition
         in={activeMenu === "settings"}
         timeout={500}
         classNames="menu-secondary"
@@ -155,12 +153,12 @@ function DropdownMenu({ leftAligned, user }) {
           <DropdownItem leftIcon="🦋">Horse?</DropdownItem>
           <DropdownItem leftIcon="🦔">Hedgehog</DropdownItem>
         </div>
-      </CSSTransition>
+      </CSSTransition> */}
     </div>
   );
 }
 
-const Dropdown = () => {
+const Dropdown = (props) => {
   const [menuOpen, setMenuOpen] = useState(false);
 
   return (
@@ -172,10 +170,20 @@ const Dropdown = () => {
           setMenuOpen(!menuOpen);
         }}
       >
-        Actions
+        {props.value || props.placeholder || "Actions"}
         <Icon name="chevron down" style={{marginLeft: "auto"}} />
       </AppButton>
-      {menuOpen && <DropdownMenu leftAligned user={{}}></DropdownMenu>}
+      {menuOpen && (
+        <DropdownMenu
+          selected={props.value}
+          leftAligned
+          options={props.options}
+          onClick={(action) => {
+            props.onClick(action);
+            setMenuOpen(false);
+          }}
+        ></DropdownMenu>
+      )}
     </DropdownContainer>
   );
 }
