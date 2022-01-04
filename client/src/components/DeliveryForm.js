@@ -34,6 +34,10 @@ const Title = styled.div`
 const Content = styled.div`
   display: flex;
   flex-direction: column;
+  // padding: 32px;
+`;
+
+const InnerContent = styled(Content)`
   padding: 32px;
 `;
 
@@ -148,83 +152,86 @@ function DeliveryForm({ delivery = {}, onDone, onClose, onCancel, ...props }) {
     >
       {({ values, setFieldValue, submitForm }) => (
         <Content>
-          <Title>
-            { props.title }
-            { onClose && (
-              <CloseIcon
-                src={closeIcon}
-                alt="user icon"
-                onClick={onClose}
-              />
+          <InnerContent>
+            <Title>
+              { props.title }
+              { onClose && (
+                <CloseIcon
+                  src={closeIcon}
+                  alt="user icon"
+                  onClick={onClose}
+                />
+              )}
+            </Title>
+
+            { props.description && (
+              <Description>{props.description}</Description>
             )}
-          </Title>
 
-          { props.description && (
-            <Description>{props.description}</Description>
-          )}
+            <Form>
+              <Form.Group widths="equal" style={{marginBottom: "32px"}}>
+                <Form.Field>
+                  <Label className="ui form field nuvo-label">Order ID</Label>
+                  <Field name="orderId" as={FormInput} />
+                </Form.Field>
 
-          <Form>
-            <Form.Group widths="equal" style={{marginBottom: "32px"}}>
-              <Form.Field>
-                <Label className="ui form field nuvo-label">Order ID</Label>
-                <Field name="orderId" as={FormInput} />
-              </Form.Field>
+                <Form.Field>
+                  <Label className="ui form field nuvo-label">Technician</Label>
+                  {/* <Field name="technician" as={FormInput} /> */}
+                  <Search
+                    as={FormInput}
+                    name="technician"
+                    loading={loading}
+                    onResultSelect={(e, data) => {
+                      dispatch({ type: 'UPDATE_SELECTION', selection: data.result.title });
+                      setFieldValue("technician", data.result.title);
+                    }}
+                    onSearchChange={handleSearchChange}
+                    results={results}
+                    value={value}
+                  />
+                </Form.Field>
+              </Form.Group>
+              <Form.Group widths="equal">
+                <Form.Field>
+                  <Label className="ui form field nuvo-label">Platform</Label>
+                  <Dropdown
+                    value={values.platform}
+                    text="Platform"
+                    options={[
+                      {text: "Alpha", value: "alpha"},
+                      {text: "Beta", value: "beta"},
+                      {text: "Gama", value: "gamma"},
+                      {text: "Tetha", value: "tetha"},
+                    ]}
+                    onClick={(action) => {
+                      setFieldValue("platform", action.text);
+                    }}
+                  />
+                </Form.Field>
+                <Form.Field>
+                  <Label className="ui form field nuvo-label">Drone</Label>
+                  <Dropdown
+                    value={values.drone}
+                    text="Drone"
+                    options={[
+                      {text: "DJI-001Q", value: "DJI-001Q"},
+                      {text: "DJI-002Q", value: "DJI-002Q"},
+                      {text: "DJI-003Q", value: "DJI-003Q"},
+                      {text: "DJI-004Q", value: "DJI-004Q"},
+                    ]}
+                    onClick={(action) => {
+                      setFieldValue("drone", action.value);
+                    }}
+                  />
+                </Form.Field>
+              </Form.Group>
+              {/* <pre>
+                { JSON.stringify(values, null, 2) }
+              </pre> */}
+            </Form>
+          </InnerContent>
 
-              <Form.Field>
-                <Label className="ui form field nuvo-label">Technician</Label>
-                {/* <Field name="technician" as={FormInput} /> */}
-                <Search
-                  as={FormInput}
-                  name="technician"
-                  loading={loading}
-                  onResultSelect={(e, data) => {
-                    dispatch({ type: 'UPDATE_SELECTION', selection: data.result.title });
-                    setFieldValue("technician", data.result.title);
-                  }}
-                  onSearchChange={handleSearchChange}
-                  results={results}
-                  value={value}
-                />
-              </Form.Field>
-            </Form.Group>
-            <Form.Group widths="equal" style={{marginBottom: "32px"}}>
-              <Form.Field>
-                <Label className="ui form field nuvo-label">Platform</Label>
-                <Dropdown
-                  value={values.platform}
-                  text="Platform"
-                  options={[
-                    {text: "Alpha", value: "alpha"},
-                    {text: "Beta", value: "beta"},
-                    {text: "Gama", value: "gamma"},
-                    {text: "Tetha", value: "tetha"},
-                  ]}
-                  onClick={(action) => {
-                    setFieldValue("platform", action.text);
-                  }}
-                />
-              </Form.Field>
-              <Form.Field>
-                <Label className="ui form field nuvo-label">Drone</Label>
-                <Dropdown
-                  value={values.drone}
-                  text="Drone"
-                  options={[
-                    {text: "DJI-001Q", value: "DJI-001Q"},
-                    {text: "DJI-002Q", value: "DJI-002Q"},
-                    {text: "DJI-003Q", value: "DJI-003Q"},
-                    {text: "DJI-004Q", value: "DJI-004Q"},
-                  ]}
-                  onClick={(action) => {
-                    setFieldValue("drone", action.value);
-                  }}
-                />
-              </Form.Field>
-            </Form.Group>
-            {/* <pre>
-              { JSON.stringify(values, null, 2) }
-            </pre> */}
-          </Form>
           <Actions style={{backgroundColor: "transparent"}}>
             <AppButton basic onClick={onCancel}>
               Cancel
