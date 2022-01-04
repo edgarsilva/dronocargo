@@ -1,12 +1,12 @@
-# MY_WEBAPP - Online Ordering Webapp
+# Dronocargo - Online Ordering Webapp
 
 ## Tech Stack
 
-MY_WEBAPP Webapp Client - Webapp is set up to consume the MY_WEBAPP API, the tech stack consists of the following:
+Dronocargo Webapp Client - Webapp is set up to consume the Dronocargo API, the tech stack consists of the following:
 
 #### Server Side
 
-Serving the Webapp Client sstatic assets (html, js, css, etc) is a Lite Express.js Server, this is also used for light session management, keys, Vendor APIs interactions that need to happen on server and are not relevant to the MY_WEBAPP API (like oAuth flows), also this should let us du SSR (Server Side Rendering) and SEO (Search Engine Optimizations) if we need to.
+Serving the Webapp Client sstatic assets (html, js, css, etc) is a Lite Express.js Server, this is also used for light session management, keys, Vendor APIs interactions that need to happen on server and are not relevant to the Dronocargo API (like oAuth flows), also this should let us du SSR (Server Side Rendering) and SEO (Search Engine Optimizations) if we need to.
 
 Located at the root of our app, point of entry `index.js` as usual, dependencies can be checked in the `package.json`
 
@@ -21,14 +21,12 @@ The client side is a React/Redux app located in the `./client` directory of the 
 - react: v17.0.2
 - redux: v4.1.0
 - react-redux: v7.2.4
-- Material-UI/Core: v4.11.4
-- Material-UI/Icons: v4.11.2
+- Semantic-UI: v2.0.4
 
-For UI/UX, Theming and CSS we are using both [Material-UI](https://material-ui.com/) and [Styled-Components](https://styled-components.com) (in very few places or where more customization is needed), CSS management and theming are easier and the react module has a lot of great components to use as foundation for the app.
+For UI/UX, Theming and CSS we are using Semantic UI and [Styled-Components](https://styled-components.com), to make CSS management and theming easier, plus the react library module has a lot of great components to use as foundation for the app.
 
 As development is kicking off we are theming lightly from the start, we'll start theming at a later date, more than likely after v1.0.0 of the app is released.
 
-You can find the App custom Material-UI theme at `/client/src/styles/material-ui-theme.js`.
 ### Development Setup
 
 You need Node.js, NPM and Redis running locally for develpment.
@@ -82,7 +80,7 @@ and is configured with hot-reloading, that means it automatically tracks changes
 The app is setup to deploy to production servers when there's a merge to the main
 branch. The branch is protected and only approved and commits that have passes all CI
 checks would be merged in, you can check the status of the checks here ->
-[Github MY_WEBAPP Webapp](https://github.com/MY_WEBAPP/webapp) just go to the
+[Github Dronocargo Webapp](https://github.com/Dronocargo/webapp) just go to the
 to the pull request you are waiting on and click it to see the pending checks.
 
 The app is being deployed to heroku on `main` branch merges but can also be manually pushed from `heroku cli`
