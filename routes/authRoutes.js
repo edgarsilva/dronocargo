@@ -26,7 +26,6 @@ module.exports = (app) => {
   });
 
   app.get('/auth/fetch-user', requireLogin, (req, res) => {
-    console.log("req.user =>", req.user);
     res.json({ status: "Authenticated!", user: req.user });
   });
 };

@@ -26,13 +26,17 @@
     "connect-redis": "^5.1.0",
     "express": "^4.17.1",
     "express-session": "^1.17.1",
+    "faker": "^5.5.3",
+    "firebase": "^9.6.1",
     "jsonwebtoken": "^8.5.1",
+    "lodash": "^4.17.21",
     "nodemon": "^2.0.7",
     "passport": "^0.4.1",
     "passport-google-oauth20": "^2.0.0",
     "passport-http-bearer": "^1.0.1",
     "passport-jwt": "^4.0.0",
     "passport-local": "^1.0.0",
-    "redis": "^3.1.2"
+    "redis": "^3.1.2",
+    "shortid": "^2.2.16"
   }
 }
